@@ -6,7 +6,7 @@ import { changes, snapshot, intervalMs } from './watch.js';
 import { LANGS, pickLang, makeT } from './i18n.js';
 import { TOOLS, toolById, runAudit } from './tools.js';
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 const TAURI = window.__TAURI__ || null; // present in the app (withGlobalTauri), absent when the page is opened in a browser for development
 const $ = (id) => document.getElementById(id);
 const KEY_WATCH = 'nd.watch';

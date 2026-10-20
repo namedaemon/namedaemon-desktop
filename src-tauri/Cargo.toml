@@ -1,6 +1,6 @@
 [package]
 name = "namedaemon-desktop"
-version = "0.1.0"
+version = "0.2.0"
 description = "NameDaemon desktop app: check .com names in bulk, keep a watchlist and get notified when a status changes."
 authors = ["Krasen Slavov"]
 license = "MIT"
