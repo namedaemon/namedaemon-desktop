@@ -1,0 +1,12 @@
+{
+	"name": "namedaemon-desktop",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "NameDaemon desktop app: check .com names in bulk, keep a watchlist and get notified when a status changes.",
+	"scripts": {
+		"test": "node --test ui/test/*.test.js",
+		"test:live": "NAMEDAEMON_LIVE=1 node --test ui/test/*.test.js"
+	},
+	"engines": { "node": ">=18" }
+}

@@ -1,0 +1,47 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "NameDaemon",
+	"version": "0.1.0",
+	"identifier": "com.namedaemon.desktop",
+	"build": {
+		"frontendDist": "../ui"
+	},
+	"app": {
+		"withGlobalTauri": true,
+		"windows": [
+			{
+				"label": "main",
+				"title": "NameDaemon",
+				"width": 980,
+				"height": 720,
+				"minWidth": 560,
+				"minHeight": 480
+			}
+		],
+		"security": {
+			"csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; img-src 'self' data:; style-src 'self'"
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": ["nsis", "msi", "deb", "appimage"],
+		"publisher": "NameDaemon",
+		"copyright": "Copyright (c) 2026 Krasen Slavov. MIT licence.",
+		"category": "Utility",
+		"shortDescription": "Check .com names in bulk, keep a watchlist, get notified.",
+		"longDescription": "NameDaemon checks .com domain names in bulk against a daily snapshot of the .com zone, keeps a local watchlist and sends a notification when a watched name changes status. Free, no account, no analytics.",
+		"license": "MIT",
+		"licenseFile": "../LICENSE",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		],
+		"windows": {
+			"webviewInstallMode": { "type": "downloadBootstrapper" },
+			"nsis": { "installMode": "currentUser" }
+		}
+	}
+}

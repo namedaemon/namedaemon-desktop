@@ -1,0 +1,16 @@
+{
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "main-window",
+	"description": "What the local app window may do. The remote tools window (label \"tools\") is not listed here, so it gets no access to the app's commands or plugins.",
+	"windows": ["main"],
+	"permissions": [
+		"core:default",
+		"notification:default",
+		"dialog:allow-save",
+		"clipboard-manager:allow-read-text",
+		{
+			"identifier": "http:default",
+			"allow": [{ "url": "https://namedaemon.com/wp-json/nd/v1/*" }]
+		}
+	]
+}
