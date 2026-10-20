@@ -1,0 +1,11 @@
+{
+	"productName": "namedaemon",
+	"bundle": {
+		"linux": {
+			"deb": {
+				"desktopTemplate": "namedaemon.desktop"
+			},
+			"appimage": {}
+		}
+	}
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Categories={{categories}}
+Comment=Check .com names in bulk, keep a watchlist
+Exec={{exec}}
+Icon={{icon}}
+Name=NameDaemon
+Terminal=false
+Type=Application
