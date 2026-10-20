@@ -16,7 +16,7 @@ Download the installer for your system from the [releases page](https://github.c
 | System | File | Notes |
 | --- | --- | --- |
 | Windows 10/11 | `NameDaemon_<version>_x64-setup.exe` or `.msi` | Needs the Microsoft WebView2 runtime (already on Windows 11 and current Windows 10; the installer downloads it if missing). Releases are not code-signed yet, so Windows SmartScreen may show a warning: choose "More info" > "Run anyway" if the checksum matches. |
-| Linux | `.AppImage` (any distribution), `.deb` (Debian, Ubuntu) | The `.AppImage` needs `chmod +x`. The `.deb` needs `libwebkit2gtk-4.1` and, for the tray icon, `libayatana-appindicator3`. |
+| Linux | `namedaemon_<version>_amd64.AppImage` (any distribution), `namedaemon_<version>_amd64.deb` (Debian, Ubuntu) | The `.AppImage` needs `chmod +x`. The `.deb` installs the package `namedaemon` (command `namedaemon-desktop`, menu entry "NameDaemon") and needs `libwebkit2gtk-4.1` and, for the tray icon, `libayatana-appindicator3`. Remove it with `sudo apt remove namedaemon`. |
 | macOS | not yet | Planned once the signing question is settled. |
 
 ## Build from source
