@@ -4,6 +4,7 @@ import { createApi } from './api.js';
 import { toCsv } from './csv.js';
 import { changes, snapshot, intervalMs } from './watch.js';
 import { LANGS, pickLang, makeT } from './i18n.js';
+import { TOOLS, toolById, runAudit } from './tools.js';
 
 const VERSION = '0.1.0';
 const TAURI = window.__TAURI__ || null; // present in the app (withGlobalTauri), absent when the page is opened in a browser for development
@@ -16,6 +17,9 @@ let apiKey = '';
 let lastResults = [];
 let lastAsOf = '';
 let watchTimer = null;
+let toolView = null; // the last result of a tool, drawn again when the language changes
+let currentToolId = 'generator';
+const WEB_SLUG = { generator: 'domain-name-generator', score: 'domain-score', appraisal: 'domain-appraisal', audit: 'domain-audit', health: 'domain-health', short: 'short-domains', calendar: 'drop-calendar' };
 
 // ---- storage -------------------------------------------------------------
 function load(key, fallback) {
@@ -48,6 +52,8 @@ async function loadLang(lang) {
 	$('version').textContent = t('settings.version', { version: VERSION });
 	renderWatch();
 	if (lastResults.length) renderResults();
+	renderToolPicker();
+	if (toolView) drawView(toolView.view);
 	if (TAURI) TAURI.core.invoke('set_tray_labels', { open: t('tray.open'), clipboard: t('tray.clipboard'), tools: t('tray.tools'), quit: t('tray.quit') }).catch(() => {});
 }
 
@@ -72,7 +78,7 @@ function setText(id, text, isError = false) {
 // ---- tabs ----------------------------------------------------------------
 function showTab(name) {
 	for (const b of document.querySelectorAll('.tab')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
-	for (const id of ['check', 'watch', 'settings']) $(`tab-${id}`).hidden = id !== name;
+	for (const id of ['check', 'tools', 'watch', 'settings']) $(`tab-${id}`).hidden = id !== name;
 }
 
 // ---- results -------------------------------------------------------------
@@ -146,6 +152,105 @@ async function exportCsv() {
 		a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
 		a.download = name;
 		a.click();
+	}
+}
+
+// ---- tools ---------------------------------------------------------------
+const el = (tag, props = {}, ...kids) => {
+	const n = document.createElement(tag);
+	Object.assign(n, props);
+	for (const k of kids) n.append(k);
+	return n;
+};
+const show = (v) => (v && typeof v === 'object' && v.key ? t(v.key) : v === null || v === undefined ? '' : String(v));
+
+function openWeb(path) {
+	if (TAURI) TAURI.core.invoke('open_tools', { path }).catch(() => {});
+}
+
+function renderToolPicker() {
+	const pick = $('tool-pick');
+	pick.replaceChildren(...TOOLS.map((tool) => el('option', { value: tool.id, textContent: t(`tool.${tool.id}.name`) })));
+	pick.value = currentToolId;
+	renderToolForm();
+}
+
+function renderToolForm() {
+	const tool = toolById(currentToolId);
+	const form = $('tool-form');
+	form.replaceChildren();
+	$('tool-desc').textContent = t(`tool.${tool.id}.desc`);
+	if (tool.kind === 'link') {
+		form.append(el('div', { className: 'actions' }, el('button', { type: 'button', className: 'btn btn--primary', textContent: t('tools.goCheck'), onclick: () => showTab(tool.tab) })));
+		return;
+	}
+	for (const f of tool.fields || []) {
+		const id = `tf-${f.id}`;
+		const input =
+			f.type === 'select'
+				? el('select', { id }, ...f.options.map((o) => el('option', { value: o.value, textContent: o.key ? t(o.key) : o.text })))
+				: el('input', { id, type: 'text', maxLength: f.maxlength || 80, placeholder: f.placeholder || '', spellcheck: false, autocomplete: 'off' });
+		if (f.value) input.value = f.value;
+		input.dataset.field = f.id;
+		form.append(el('div', { className: 'field' }, el('label', { htmlFor: id, textContent: t(f.label) }), input));
+	}
+	const run = el('button', { type: 'submit', id: 'tool-run', className: 'btn btn--primary', textContent: t('tools.run') });
+	const actions = el('div', { className: 'actions' }, run);
+	if (WEB_SLUG[tool.id]) actions.append(el('button', { type: 'button', className: 'btn', textContent: t('tools.openFull'), onclick: () => openWeb(`/app/${WEB_SLUG[tool.id]}/`) }));
+	form.append(actions);
+}
+
+function drawView(view) {
+	const out = $('tool-result');
+	out.replaceChildren();
+	if (view.ready) out.append(el('p', { className: 'st st--available', textContent: t(view.ready.key, { name: view.ready.name }) }));
+	if (view.facts && view.facts.length) {
+		const dl = el('dl', { className: 'facts' });
+		for (const [label, value] of view.facts) dl.append(el('dt', { textContent: t(label) }), el('dd', { textContent: show(value) }));
+		out.append(dl);
+	}
+	for (const tb of view.tables || []) {
+		if (!tb.rows.length) continue;
+		if (tb.titleKey) out.append(el('h2', { className: 'h2', textContent: t(tb.titleKey) }));
+		const table = el('table', {}, el('thead', {}, el('tr', {}, ...tb.head.map((k) => el('th', { textContent: t(k) })))), el('tbody', {}, ...tb.rows.map((r) => el('tr', {}, ...r.map((c) => el('td', { textContent: show(c) }))))));
+		out.append(el('div', { className: 'table-wrap' }, table));
+	}
+	for (const l of view.lists || []) {
+		if (!l.items.length) continue;
+		out.append(el('h2', { className: 'h2', textContent: t(l.titleKey) }), el('ul', { className: 'view-list' }, ...l.items.map((i) => el('li', { textContent: i }))));
+	}
+	if (view.open) out.append(el('p', {}, el('button', { type: 'button', className: 'btn btn--primary', textContent: t(view.open.key), onclick: () => openWeb(view.open.path) })));
+	for (const n of view.notes || []) out.append(el('p', { className: 'hint', textContent: typeof n === 'string' ? n : t(n.key) }));
+	if (!out.children.length) out.append(el('p', { className: 'hint', textContent: t('note.noResults') }));
+}
+
+async function runTool() {
+	const tool = toolById(currentToolId);
+	const values = {};
+	for (const f of tool.fields || []) values[f.id] = $(`tf-${f.id}`).value;
+	const req = tool.request(values);
+	if (!req) {
+		setText('tool-status', t('tools.noName'), true);
+		return;
+	}
+	const btn = $('tool-run');
+	btn.disabled = true;
+	setText('tool-status', t('tools.working'));
+	try {
+		let data;
+		if (tool.kind === 'audit') {
+			data = await runAudit(api(), req.params.name, { onProgress: (p) => setText('tool-status', t('tools.auditProgress', p)) });
+		} else {
+			data = await api().get(req.route, req.params);
+		}
+		const view = tool.view(data, req);
+		toolView = { view };
+		drawView(view);
+		setText('tool-status', '');
+	} catch (e) {
+		setText('tool-status', e && e.slow ? t('tools.auditSlow') : errorText(e), true);
+	} finally {
+		btn.disabled = false;
 	}
 }
 
@@ -290,6 +395,17 @@ async function start() {
 	}
 
 	for (const b of document.querySelectorAll('.tab')) b.addEventListener('click', () => showTab(b.dataset.tab));
+	$('tool-pick').addEventListener('change', () => {
+		currentToolId = $('tool-pick').value;
+		toolView = null;
+		$('tool-result').replaceChildren();
+		setText('tool-status', '');
+		renderToolForm();
+	});
+	$('tool-form').addEventListener('submit', (e) => {
+		e.preventDefault();
+		runTool();
+	});
 	$('check-btn').addEventListener('click', runCheck);
 	$('paste-btn').addEventListener('click', pasteClipboard);
 	$('export-btn').addEventListener('click', exportCsv);

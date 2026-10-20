@@ -3,9 +3,10 @@
 A small, free desktop app for [NameDaemon](https://namedaemon.com), the .com domain tools. Check up to 50 names at a time, export the results to CSV, keep a watchlist and get a notification when a watched name changes status. Windows and Linux first.
 
 - **Bulk check:** paste or type names (one per line or comma-separated; `Nova.com` and `https://nova.com/x` both become `nova`). Status from the daily snapshot of the .com zone, with the estimated drop date and the registrar when known. "Not in the snapshot" is never shown as "available": confirm with a live check and your registrar.
+- **All nine free tools, built in:** name generator, availability checker, domain report, domain score, appraisal, audit, domain health, short domains and the drop calendar. Each has a small form and a clear result; the domain report opens its full page, and every tool can be opened on the website for more detail.
 - **Watchlist:** names are saved on your computer and re-checked every few hours (default 6, set in Settings). A native notification tells you when a name moves, for example from taken to dropping.
 - **Tray icon:** check the name in the clipboard, open the app, open all the tools, quit. Closing the window keeps the app in the tray (can be turned off).
-- **All the website's tools:** "Open all tools" opens https://namedaemon.com/app/ in a second window.
+- **The website window:** "Open all tools" (and the tray menu) opens https://namedaemon.com/app/ in a second window.
 - **Private:** no account, no analytics, no telemetry. See [PRIVACY.md](PRIVACY.md).
 - English, Spanish, French and German. MIT licensed, no API key needed (an optional Pro+ or Business key is kept in the system keyring).
 

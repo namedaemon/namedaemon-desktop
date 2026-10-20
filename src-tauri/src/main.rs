@@ -12,7 +12,7 @@ use tauri_plugin_clipboard_manager::ClipboardExt;
 
 const KEYRING_SERVICE: &str = "com.namedaemon.desktop";
 const KEYRING_USER: &str = "api-key";
-const TOOLS_URL: &str = "https://namedaemon.com/app/";
+const TOOLS_URL_ORIGIN: &str = "https://namedaemon.com";
 
 #[derive(Default)]
 struct HideOnClose(AtomicBool);
@@ -35,13 +35,26 @@ fn show_main(app: &AppHandle) {
     }
 }
 
+/// Only the website's app pages and domain report pages may be opened, with simple paths (letters, digits, dash, slash).
+fn allowed_path(path: &str) -> bool {
+    (path.starts_with("/app/") || path.starts_with("/domain/"))
+        && path.len() <= 120
+        && !path.contains("//")
+        && path.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '/' || c == '-')
+}
+
 #[tauri::command]
-fn open_tools(app: AppHandle) -> Result<(), String> {
+fn open_tools(app: AppHandle, path: Option<String>) -> Result<(), String> {
+    let path = path.unwrap_or_else(|| "/app/".to_string());
+    if !allowed_path(&path) {
+        return Err("path not allowed".into());
+    }
+    let url: tauri::Url = format!("{}{}", TOOLS_URL_ORIGIN, path).parse().map_err(|_| "bad url".to_string())?;
     if let Some(w) = app.get_webview_window("tools") {
+        let _ = w.navigate(url);
         let _ = w.show();
         return w.set_focus().map_err(|e| e.to_string());
     }
-    let url = TOOLS_URL.parse().map_err(|_| "bad url".to_string())?;
     WebviewWindowBuilder::new(&app, "tools", WebviewUrl::External(url))
         .title("NameDaemon tools")
         .inner_size(1100.0, 800.0)
@@ -110,7 +123,7 @@ fn build_tray(app: &tauri::App) -> tauri::Result<()> {
         .on_menu_event(|app, event| match event.id.as_ref() {
             "open" => show_main(app),
             "tools" => {
-                let _ = open_tools(app.clone());
+                let _ = open_tools(app.clone(), None);
             }
             "clipboard" => {
                 let text = app.clipboard().read_text().unwrap_or_default();

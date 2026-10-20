@@ -18,15 +18,21 @@ export function createApi({ fetch, baseUrl = DEFAULT_BASE_URL, apiKey = '', user
 	if (typeof fetch !== 'function') throw new ApiError('No fetch available');
 	const root = baseUrl.replace(/\/+$/, '');
 
-	async function post(path, body) {
+	async function request(method, path, { params, body } = {}) {
+		const query = Object.entries(params || {})
+			.filter(([, v]) => v !== undefined && v !== null && v !== '')
+			.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(Array.isArray(v) ? v.join(',') : v)}`)
+			.join('&');
+		const url = `${root}/${path.replace(/^\/+/, '')}${query ? `?${query}` : ''}`;
 		for (let attempt = 0; ; attempt++) {
-			const headers = { Accept: 'application/json', 'Content-Type': 'application/json', 'User-Agent': userAgent };
+			const headers = { Accept: 'application/json', 'User-Agent': userAgent };
+			if (body !== undefined) headers['Content-Type'] = 'application/json';
 			if (apiKey) headers['X-ND-API-Key'] = apiKey;
 			const ctl = typeof AbortController === 'function' ? new AbortController() : null;
 			const timer = ctl ? setTimeout(() => ctl.abort(), timeoutMs) : null;
 			let res;
 			try {
-				res = await fetch(`${root}/${path.replace(/^\/+/, '')}`, { method: 'POST', headers, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined });
+				res = await fetch(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body), signal: ctl ? ctl.signal : undefined });
 			} catch (e) {
 				throw new ApiError(e && e.name === 'AbortError' ? 'timeout' : `network: ${e && e.message ? e.message : e}`, { code: 'network' });
 			} finally {
@@ -58,7 +64,11 @@ export function createApi({ fetch, baseUrl = DEFAULT_BASE_URL, apiKey = '', user
 		}
 	}
 
+	const post = (path, body) => request('POST', path, { body });
+
 	return {
+		/** Any public GET route with query parameters; empty values are dropped. */
+		get: (path, params) => request('GET', path, { params }),
 		/** Status of up to 50 names. */
 		check: (labels, verify = 0) => post('check', { domains: labels, verify }),
 		/**

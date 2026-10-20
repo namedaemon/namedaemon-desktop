@@ -11,6 +11,7 @@
 		<h1 class="brand"><span class="brand__mark" aria-hidden="true">N</span> NameDaemon</h1>
 		<nav class="tabs" role="tablist">
 			<button class="tab" role="tab" data-tab="check" aria-selected="true" data-i18n="tab.check">Check</button>
+			<button class="tab" role="tab" data-tab="tools" aria-selected="false" data-i18n="tab.tools">Tools</button>
 			<button class="tab" role="tab" data-tab="watch" aria-selected="false" data-i18n="tab.watchlist">Watchlist</button>
 			<button class="tab" role="tab" data-tab="settings" aria-selected="false" data-i18n="tab.settings">Settings</button>
 		</nav>
@@ -39,6 +40,15 @@
 				</div>
 				<p id="as-of" class="hint"></p>
 			</div>
+		</section>
+
+		<section id="tab-tools" class="panel" role="tabpanel" hidden>
+			<label for="tool-pick" class="label" data-i18n="tools.pick">Tool</label>
+			<select id="tool-pick"></select>
+			<p id="tool-desc" class="hint"></p>
+			<form id="tool-form" class="tool-form" novalidate></form>
+			<p id="tool-status" class="status-text" role="status" aria-live="polite"></p>
+			<div id="tool-result"></div>
 		</section>
 
 		<section id="tab-watch" class="panel" role="tabpanel" hidden>
