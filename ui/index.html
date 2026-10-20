@@ -8,7 +8,7 @@
 </head>
 <body>
 	<header class="top">
-		<h1 class="brand"><span class="brand__mark" aria-hidden="true">N</span> NameDaemon</h1>
+		<h1 class="brand"><span class="brand__mark" aria-hidden="true">N</span><span>NameDaemon</span></h1>
 		<nav class="tabs" role="tablist">
 			<button class="tab" role="tab" data-tab="check" aria-selected="true" data-i18n="tab.check">Check</button>
 			<button class="tab" role="tab" data-tab="tools" aria-selected="false" data-i18n="tab.tools">Tools</button>
@@ -20,66 +20,82 @@
 
 	<main>
 		<section id="tab-check" class="panel" role="tabpanel">
-			<label for="names" class="label" data-i18n="check.label">Names to check</label>
-			<textarea id="names" rows="6" spellcheck="false" autocomplete="off"></textarea>
-			<p class="hint" data-i18n="check.hint"></p>
-			<div class="row">
+			<div class="field">
+				<label for="names" data-i18n="check.label">Names to check</label>
+				<textarea id="names" rows="7" spellcheck="false" autocomplete="off"></textarea>
+				<div class="field__meta"><span class="hint" data-i18n="check.hint"></span><span id="names-count" class="count" aria-live="polite"></span></div>
+			</div>
+			<div class="actions">
 				<button id="check-btn" class="btn btn--primary" data-i18n="check.button">Check</button>
 				<button id="paste-btn" class="btn" data-i18n="check.pasteClipboard">Paste from clipboard</button>
 				<span id="check-status" class="status-text" role="status" aria-live="polite"></span>
 			</div>
-			<div id="results-wrap" hidden>
-				<h2 class="h2" data-i18n="check.results">Results</h2>
+			<div id="results-wrap" class="card" hidden>
+				<div class="card__head">
+					<h2 data-i18n="check.results">Results</h2>
+					<div class="actions actions--end">
+						<button id="export-btn" class="btn btn--small" data-i18n="check.exportCsv">Export CSV</button>
+						<button id="addwatch-btn" class="btn btn--small" data-i18n="check.addWatch">Add all to watchlist</button>
+					</div>
+				</div>
 				<div class="table-wrap"><table id="results">
 					<thead><tr><th data-i18n="col.name">Name</th><th data-i18n="col.status">Status</th><th data-i18n="col.registrar">Registrar</th><th data-i18n="col.drop">Estimated drop</th></tr></thead>
 					<tbody></tbody>
 				</table></div>
-				<div class="row">
-					<button id="export-btn" class="btn" data-i18n="check.exportCsv">Export CSV</button>
-					<button id="addwatch-btn" class="btn" data-i18n="check.addWatch">Add all to watchlist</button>
-				</div>
 				<p id="as-of" class="hint"></p>
 			</div>
 		</section>
 
 		<section id="tab-tools" class="panel" role="tabpanel" hidden>
-			<label for="tool-pick" class="label" data-i18n="tools.pick">Tool</label>
-			<select id="tool-pick"></select>
+			<div id="tool-chips" class="chips" role="group"></div>
 			<p id="tool-desc" class="hint"></p>
 			<form id="tool-form" class="tool-form" novalidate></form>
 			<p id="tool-status" class="status-text" role="status" aria-live="polite"></p>
-			<div id="tool-result"></div>
+			<div id="tool-result" class="stack"></div>
 		</section>
 
 		<section id="tab-watch" class="panel" role="tabpanel" hidden>
-			<h2 class="h2" data-i18n="watch.title">Watchlist</h2>
-			<label for="watch-names" class="label" data-i18n="watch.addPlaceholder">Names to watch</label>
-			<div class="row">
+			<div class="field">
+				<label for="watch-names" data-i18n="watch.addPlaceholder">Names to watch</label>
 				<input id="watch-names" type="text" spellcheck="false" autocomplete="off">
+			</div>
+			<div class="actions">
 				<button id="watch-add" class="btn" data-i18n="watch.add">Add names</button>
 				<button id="watch-now" class="btn btn--primary" data-i18n="watch.checkNow">Check now</button>
+				<span id="watch-status" class="status-text" role="status" aria-live="polite"></span>
 			</div>
-			<p id="watch-status" class="status-text" role="status" aria-live="polite"></p>
-			<p id="watch-empty" class="hint" data-i18n="watch.empty"></p>
-			<div class="table-wrap"><table id="watch-table" hidden>
-				<thead><tr><th data-i18n="col.name">Name</th><th data-i18n="col.status">Status</th><th data-i18n="col.drop">Estimated drop</th><th></th></tr></thead>
-				<tbody></tbody>
-			</table></div>
-			<p id="watch-last" class="hint"></p>
+			<div class="card">
+				<div class="card__head"><h2 data-i18n="watch.title">Watchlist</h2><span id="watch-last" class="hint"></span></div>
+				<p id="watch-empty" class="empty" data-i18n="watch.empty"></p>
+				<div class="table-wrap"><table id="watch-table" hidden>
+					<thead><tr><th data-i18n="col.name">Name</th><th data-i18n="col.status">Status</th><th data-i18n="col.drop">Estimated drop</th><th></th></tr></thead>
+					<tbody></tbody>
+				</table></div>
+			</div>
 		</section>
 
 		<section id="tab-settings" class="panel" role="tabpanel" hidden>
-			<h2 class="h2" data-i18n="settings.title">Settings</h2>
-			<label for="set-hours" class="label" data-i18n="settings.interval"></label>
-			<input id="set-hours" type="number" min="1" max="168" step="1">
-			<label for="set-key" class="label" data-i18n="settings.apiKey"></label>
-			<input id="set-key" type="password" autocomplete="off" spellcheck="false">
-			<p class="hint" data-i18n="settings.apiKeyHelp"></p>
-			<p id="keyring-warn" class="hint warn" hidden data-i18n="settings.keyringMissing"></p>
-			<label for="set-lang" class="label" data-i18n="settings.language"></label>
-			<select id="set-lang"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option></select>
-			<label class="check"><input id="set-tray" type="checkbox"> <span data-i18n="settings.tray"></span></label>
-			<div class="row"><button id="set-save" class="btn btn--primary" data-i18n="settings.save">Save</button><span id="set-status" class="status-text" role="status" aria-live="polite"></span></div>
+			<div class="card stack">
+				<div class="field">
+					<label for="set-hours" data-i18n="settings.interval"></label>
+					<input id="set-hours" type="number" min="1" max="168" step="1">
+				</div>
+				<div class="field">
+					<label for="set-key" data-i18n="settings.apiKey"></label>
+					<input id="set-key" type="password" autocomplete="off" spellcheck="false">
+					<span class="hint" data-i18n="settings.apiKeyHelp"></span>
+					<span id="keyring-warn" class="hint warn" hidden data-i18n="settings.keyringMissing"></span>
+				</div>
+				<div class="field">
+					<label for="set-lang" data-i18n="settings.language"></label>
+					<select id="set-lang"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option></select>
+				</div>
+				<label class="check"><input id="set-tray" type="checkbox"><span data-i18n="settings.tray"></span></label>
+				<div class="actions">
+					<button id="set-save" class="btn btn--primary" data-i18n="settings.save">Save</button>
+					<span id="set-status" class="status-text" role="status" aria-live="polite"></span>
+				</div>
+			</div>
 			<p class="hint" data-i18n="settings.privacy"></p>
 			<p id="version" class="hint"></p>
 		</section>

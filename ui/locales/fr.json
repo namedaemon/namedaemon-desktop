@@ -166,5 +166,6 @@
 	"col.severity": "Gravité",
 	"note.checkAvail": "Ces noms ne sont pas vérifiés en direct : utilisez le vérificateur et votre bureau d'enregistrement avant d'acheter.",
 	"note.estimates": "Les dates sont des estimations.",
-	"note.noResults": "Rien trouvé."
+	"note.noResults": "Rien trouvé.",
+	"check.count": "Noms prêts : {n}"
 }

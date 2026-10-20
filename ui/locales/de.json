@@ -166,5 +166,6 @@
 	"col.severity": "Schweregrad",
 	"note.checkAvail": "Diese Namen werden nicht live geprüft: Nutzen Sie vor dem Kauf den Prüfer und Ihren Registrar.",
 	"note.estimates": "Die Daten sind Schätzungen.",
-	"note.noResults": "Nichts gefunden."
+	"note.noResults": "Nichts gefunden.",
+	"check.count": "Bereite Namen: {n}"
 }

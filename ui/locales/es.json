@@ -166,5 +166,6 @@
 	"col.severity": "Gravedad",
 	"note.checkAvail": "Estos nombres no se comprueban en vivo: usa el comprobador y tu registrador antes de comprar.",
 	"note.estimates": "Las fechas son estimaciones.",
-	"note.noResults": "No se encontró nada."
+	"note.noResults": "No se encontró nada.",
+	"check.count": "Nombres listos: {n}"
 }

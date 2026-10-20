@@ -166,5 +166,6 @@
 	"col.severity": "Severity",
 	"note.checkAvail": "These names are not checked live: use the checker and your registrar before you buy.",
 	"note.estimates": "Dates are estimates.",
-	"note.noResults": "Nothing found."
+	"note.noResults": "Nothing found.",
+	"check.count": "Names ready: {n}"
 }

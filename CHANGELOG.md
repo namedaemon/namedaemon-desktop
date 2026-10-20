@@ -3,6 +3,7 @@
 ## 0.2.0
 
 - **Tools tab:** the website's nine free tools as native pages (name generator, availability checker, domain report, domain score, appraisal, audit, domain health, short domains, drop calendar), with a picker, a small form and a compact result for each. The website window opens only app and report pages. 110 new strings in English, Spanish, French and German.
+- **Cleaner layout:** one spacing scale, every field and table the full width of the window, tool chips instead of a drop-down, status badges, a live "Names ready" count that disables Check when there is nothing to check, Enter adds names to the watchlist, consistent buttons and focus rings, a larger default window.
 
 ## 0.1.0
 

@@ -49,6 +49,7 @@ async function loadLang(lang) {
 	document.documentElement.lang = lang;
 	for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
 	$('names').placeholder = t('check.placeholder');
+	updateCount();
 	$('version').textContent = t('settings.version', { version: VERSION });
 	renderWatch();
 	if (lastResults.length) renderResults();
@@ -109,6 +110,13 @@ function renderResults() {
 	$('as-of').textContent = lastAsOf ? t('check.asOf', { date: lastAsOf }) : '';
 }
 
+function updateCount() {
+	const { labels } = parseNames($('names').value);
+	const n = labels.length;
+	$('names-count').textContent = n ? t('check.count', { n: Math.min(n, 5000) }) : '';
+	$('check-btn').disabled = n === 0;
+}
+
 async function runCheck() {
 	const { labels, rejected } = parseNames($('names').value);
 	if (!labels.length) {
@@ -127,14 +135,17 @@ async function runCheck() {
 	} catch (e) {
 		setText('check-status', errorText(e), true);
 	} finally {
-		$('check-btn').disabled = false;
+		updateCount();
 	}
 }
 
 async function pasteClipboard() {
 	try {
 		const text = TAURI && TAURI.clipboardManager ? await TAURI.clipboardManager.readText() : await navigator.clipboard.readText();
-		if (text) $('names').value = text.slice(0, 5000);
+		if (text) {
+			$('names').value = text.slice(0, 5000);
+			updateCount();
+		}
 	} catch {
 		/* clipboard not readable: leave the box as it is */
 	}
@@ -168,10 +179,17 @@ function openWeb(path) {
 	if (TAURI) TAURI.core.invoke('open_tools', { path }).catch(() => {});
 }
 
+function selectTool(id) {
+	currentToolId = id;
+	toolView = null;
+	$('tool-result').replaceChildren();
+	setText('tool-status', '');
+	renderToolPicker();
+}
+
 function renderToolPicker() {
-	const pick = $('tool-pick');
-	pick.replaceChildren(...TOOLS.map((tool) => el('option', { value: tool.id, textContent: t(`tool.${tool.id}.name`) })));
-	pick.value = currentToolId;
+	$('tool-chips').replaceChildren(...TOOLS.map((tool) => el('button', { type: 'button', className: 'chip', textContent: t(`tool.${tool.id}.name`), onclick: () => selectTool(tool.id) }, '')));
+	for (const [i, chip] of [...$('tool-chips').children].entries()) chip.setAttribute('aria-pressed', String(TOOLS[i].id === currentToolId));
 	renderToolForm();
 }
 
@@ -179,6 +197,7 @@ function renderToolForm() {
 	const tool = toolById(currentToolId);
 	const form = $('tool-form');
 	form.replaceChildren();
+	form.classList.toggle('single', (tool.fields || []).length === 1);
 	$('tool-desc').textContent = t(`tool.${tool.id}.desc`);
 	if (tool.kind === 'link') {
 		form.append(el('div', { className: 'actions' }, el('button', { type: 'button', className: 'btn btn--primary', textContent: t('tools.goCheck'), onclick: () => showTab(tool.tab) })));
@@ -203,7 +222,7 @@ function renderToolForm() {
 function drawView(view) {
 	const out = $('tool-result');
 	out.replaceChildren();
-	if (view.ready) out.append(el('p', { className: 'st st--available', textContent: t(view.ready.key, { name: view.ready.name }) }));
+	if (view.ready) out.append(el('p', { className: 'status-text', textContent: t(view.ready.key, { name: view.ready.name }) }));
 	if (view.facts && view.facts.length) {
 		const dl = el('dl', { className: 'facts' });
 		for (const [label, value] of view.facts) dl.append(el('dt', { textContent: t(label) }), el('dd', { textContent: show(value) }));
@@ -211,13 +230,12 @@ function drawView(view) {
 	}
 	for (const tb of view.tables || []) {
 		if (!tb.rows.length) continue;
-		if (tb.titleKey) out.append(el('h2', { className: 'h2', textContent: t(tb.titleKey) }));
 		const table = el('table', {}, el('thead', {}, el('tr', {}, ...tb.head.map((k) => el('th', { textContent: t(k) })))), el('tbody', {}, ...tb.rows.map((r) => el('tr', {}, ...r.map((c) => el('td', { textContent: show(c) }))))));
-		out.append(el('div', { className: 'table-wrap' }, table));
+		out.append(el('div', { className: 'view-card' }, ...(tb.titleKey ? [el('h2', { textContent: t(tb.titleKey) })] : []), el('div', { className: 'table-wrap' }, table)));
 	}
 	for (const l of view.lists || []) {
 		if (!l.items.length) continue;
-		out.append(el('h2', { className: 'h2', textContent: t(l.titleKey) }), el('ul', { className: 'view-list' }, ...l.items.map((i) => el('li', { textContent: i }))));
+		out.append(el('div', { className: 'view-card' }, el('h2', { textContent: t(l.titleKey) }), el('ul', { className: 'view-list' }, ...l.items.map((i) => el('li', { textContent: i })))));
 	}
 	if (view.open) out.append(el('p', {}, el('button', { type: 'button', className: 'btn btn--primary', textContent: t(view.open.key), onclick: () => openWeb(view.open.path) })));
 	for (const n of view.notes || []) out.append(el('p', { className: 'hint', textContent: typeof n === 'string' ? n : t(n.key) }));
@@ -395,16 +413,13 @@ async function start() {
 	}
 
 	for (const b of document.querySelectorAll('.tab')) b.addEventListener('click', () => showTab(b.dataset.tab));
-	$('tool-pick').addEventListener('change', () => {
-		currentToolId = $('tool-pick').value;
-		toolView = null;
-		$('tool-result').replaceChildren();
-		setText('tool-status', '');
-		renderToolForm();
-	});
 	$('tool-form').addEventListener('submit', (e) => {
 		e.preventDefault();
 		runTool();
+	});
+	$('names').addEventListener('input', updateCount);
+	$('watch-names').addEventListener('keydown', (e) => {
+		if (e.key === 'Enter') $('watch-add').click();
 	});
 	$('check-btn').addEventListener('click', runCheck);
 	$('paste-btn').addEventListener('click', pasteClipboard);
@@ -426,10 +441,12 @@ async function start() {
 		TAURI.event.listen('clipboard-name', (ev) => {
 			showTab('check');
 			$('names').value = String(ev.payload || '').slice(0, 5000);
+			updateCount();
 			runCheck();
 		});
 		TAURI.event.listen('show-tab', (ev) => showTab(String(ev.payload || 'check')));
 	}
+	updateCount();
 	scheduleWatch();
 	setTimeout(() => checkWatchlist({ quiet: true }), 5000);
 }
