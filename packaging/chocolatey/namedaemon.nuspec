@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>namedaemon</id>
+    <version>0.2.0</version>
+    <title>NameDaemon</title>
+    <authors>Krasen Slavov</authors>
+    <owners>Krasen Slavov</owners>
+    <projectUrl>https://namedaemon.com/download/</projectUrl>
+    <projectSourceUrl>https://github.com/namedaemon/namedaemon-desktop</projectSourceUrl>
+    <packageSourceUrl>https://github.com/namedaemon/namedaemon-desktop/tree/main/packaging/chocolatey</packageSourceUrl>
+    <bugTrackerUrl>https://github.com/namedaemon/namedaemon-desktop/issues</bugTrackerUrl>
+    <iconUrl>https://namedaemon.com/wp-content/themes/namedaemon-retro/assets/images/app/icon-512.png</iconUrl>
+    <licenseUrl>https://github.com/namedaemon/namedaemon-desktop/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright (c) 2026 Krasen Slavov</copyright>
+    <tags>namedaemon domain domain-name domain-checker watchlist freeware</tags>
+    <summary>Check .com domain names in bulk, keep a watchlist and get notified when one changes status.</summary>
+    <description><![CDATA[NameDaemon Desktop is a small, free program for people who look for .com domain names.
+
+* Bulk check: up to 50 names at a time against a daily snapshot of the .com zone, with the registrar and the estimated drop date when known. Export the results to CSV.
+* Watchlist: names are stored on your computer and re-checked every few hours. A notification tells you when a watched name changes status.
+* The nine free NameDaemon tools as native pages: name generator, availability checker, domain report, score, appraisal, audit, domain health, short domains and a drop calendar.
+* Tray icon, and the website's tools in a second window.
+* No account, no ads, no analytics, no telemetry. A name is sent to namedaemon.com only when you check it or when the watchlist is re-checked.
+* English, Spanish, French and German.
+
+The data comes from a daily snapshot, so "not in the snapshot" does not mean a name is available: confirm with a live check and your registrar before you buy.
+
+This package downloads the official installer from namedaemon.com and verifies its SHA-256 checksum. The program is free (MIT licence), not commercial, and has no trial period.
+
+The installer is not code-signed yet, so Windows SmartScreen may show a warning.]]></description>
+    <releaseNotes>https://github.com/namedaemon/namedaemon-desktop/blob/main/CHANGELOG.md</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
